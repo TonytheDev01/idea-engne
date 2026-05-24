@@ -1,439 +1,555 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="app.css">
-    <link rel="stylesheet" href="modals.css">
-</head>
-<body>
-<header>
-  <div class="header-inner">
-    <a href="index.html" class="brand">
-      <div class="brand-icon">
-        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-        </svg>
-      </div>
-      Idea-Engne
-    </a>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Dashboard</title>
+		<link
+			rel="stylesheet"
+			href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+		<link rel="stylesheet" href="app.css" />
+		<link rel="stylesheet" href="modals.css" />
+	</head>
+	<body>
+		<header>
+			<div class="header-inner">
+				<a href="index.html" class="brand">
+					<div class="brand-icon">
+						<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+							<path
+								d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+						</svg>
+					</div>
+					Idea-Engne
+				</a>
 
-    <div class="header-actions">
-      <!-- Profile Dropdown -->
-      <div class="profile-dropdown" id="profileDropdown">
-        <button class="profile-trigger" id="profileTrigger" aria-expanded="false">
-          <div class="user-avatar" id="userAvatar">?</div>
-          <span class="user-email" id="userEmail">Loading...</span>
-          <i class="fas fa-chevron-down chevron-icon"></i>
-        </button>
+				<div class="header-actions">
+					<!-- Profile Dropdown -->
+					<div class="profile-dropdown" id="profileDropdown">
+						<button
+							class="profile-trigger"
+							id="profileTrigger"
+							aria-expanded="false">
+							<div class="user-avatar" id="userAvatar">?</div>
+							<span class="user-email" id="userEmail">Loading...</span>
+							<i class="fas fa-chevron-down chevron-icon"></i>
+						</button>
 
-        <div class="dropdown-menu" id="dropdownMenu">
-          <div class="dropdown-header">
-            <div class="dropdown-avatar" id="dropdownAvatar">?</div>
-            <div class="dropdown-user-info">
-              <strong id="dropdownName">User</strong>
-              <span id="dropdownEmail">user@email.com</span>
-              <span class="dropdown-plan" id="dropdownPlan">Free Plan</span>
-            </div>
-          </div>
+						<div class="dropdown-menu" id="dropdownMenu">
+							<div class="dropdown-header">
+								<div class="dropdown-avatar" id="dropdownAvatar">?</div>
+								<div class="dropdown-user-info">
+									<strong id="dropdownName">User</strong>
+									<span id="dropdownEmail">user@email.com</span>
+									<span class="dropdown-plan" id="dropdownPlan">Free Plan</span>
+								</div>
+							</div>
 
-          <div class="dropdown-divider"></div>
+							<div class="dropdown-divider"></div>
 
-          <button class="dropdown-item" id="settingsBtn">
-            <i class="fas fa-cog"></i>
-            <span>Settings</span>
-          </button>
+							<button class="dropdown-item" id="settingsBtn">
+								<i class="fas fa-cog"></i>
+								<span>Settings</span>
+							</button>
 
-          <button class="dropdown-item" id="profileBtn">
-            <i class="fas fa-user-edit"></i>
-            <span>Edit Profile</span>
-          </button>
+							<button class="dropdown-item" id="profileBtn">
+								<i class="fas fa-user-edit"></i>
+								<span>Edit Profile</span>
+							</button>
 
-          <button class="dropdown-item" id="savedIdeasBtn">
-            <i class="fas fa-bookmark"></i>
-            <span>Saved Ideas</span>
-          </button>
+							<button class="dropdown-item" id="savedIdeasBtn">
+								<i class="fas fa-bookmark"></i>
+								<span>Saved Ideas</span>
+							</button>
 
-          <div class="dropdown-divider"></div>
+							<div class="dropdown-divider"></div>
 
-          <button class="dropdown-item logout-item" id="logoutBtn">
-            <i class="fas fa-sign-out-alt"></i>
-            <span>Logout</span>
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-</header>
+							<button class="dropdown-item logout-item" id="logoutBtn">
+								<i class="fas fa-sign-out-alt"></i>
+								<span>Logout</span>
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</header>
 
-<!-- SETTINGS MODAL -->
-<div class="settings-modal" id="settingsModal">
-  <div class="settings-overlay" id="settingsOverlay"></div>
-  <div class="settings-content">
-    <div class="settings-header">
-      <h2><i class="fas fa-cog"></i> Settings</h2>
-      <button class="settings-close" id="settingsClose">
-        <i class="fas fa-times"></i>
-      </button>
-    </div>
+		<!-- SETTINGS MODAL -->
+		<div class="settings-modal" id="settingsModal">
+			<div class="settings-overlay" id="settingsOverlay"></div>
+			<div class="settings-content">
+				<div class="settings-header">
+					<h2><i class="fas fa-cog"></i> Settings</h2>
+					<button
+						class="settings-close"
+						id="settingsClose"
+						title="Close settings"
+						aria-label="Close settings">
+						<i class="fas fa-times" aria-hidden="true"></i>
+					</button>
+				</div>
 
-    <div class="settings-tabs">
-      <button class="settings-tab active" data-tab="profile">
-        <i class="fas fa-user"></i> Profile
-      </button>
-      <button class="settings-tab" data-tab="preferences">
-        <i class="fas fa-sliders-h"></i> Preferences
-      </button>
-      <button class="settings-tab" data-tab="account">
-        <i class="fas fa-shield-alt"></i> Account
-      </button>
-    </div>
+				<div class="settings-tabs">
+					<button class="settings-tab active" data-tab="profile">
+						<i class="fas fa-user"></i> Profile
+					</button>
+					<button class="settings-tab" data-tab="preferences">
+						<i class="fas fa-sliders-h"></i> Preferences
+					</button>
+					<button class="settings-tab" data-tab="account">
+						<i class="fas fa-shield-alt"></i> Account
+					</button>
+				</div>
 
-    <!-- Profile Tab -->
-    <div class="settings-panel active" id="tab-profile">
-      <div class="avatar-upload-section">
-        <div class="avatar-preview" id="avatarPreview">?</div>
-        <div class="avatar-upload-info">
-          <button class="btn-upload-avatar" id="uploadAvatarBtn">
-            <i class="fas fa-camera"></i> Change Photo
-          </button>
-          <input type="file" id="avatarInput" accept="image/*" style="display:none">
-          <span>JPG, PNG up to 2MB</span>
-        </div>
-      </div>
+				<!-- Profile Tab -->
+				<div class="settings-panel active" id="tab-profile">
+					<div class="avatar-upload-section">
+						<div class="avatar-preview" id="avatarPreview">?</div>
+						<div class="avatar-upload-info">
+							<button class="btn-upload-avatar" id="uploadAvatarBtn">
+								<i class="fas fa-camera"></i> Change Photo
+							</button>
+							<input
+								type="file"
+								id="avatarInput"
+								accept="image/*"
+								aria-label="Upload Profile photo" />
+                <span>JPG, PNG up to 2MB</span>
+						</div>
+					</div>
 
-      <div class="settings-form">
-        <div class="settings-field">
-          <label><i class="fas fa-user"></i> Full Name</label>
-          <input type="text" id="settingsName" class="settings-input" placeholder="Your full name">
-        </div>
+					<div class="settings-form">
+						<div class="settings-field">
+							<label><i class="fas fa-user"></i> Full Name</label>
+							<input
+								type="text"
+								id="settingsName"
+								class="settings-input"
+								placeholder="Your full name" />
+						</div>
 
-        <div class="settings-field">
-          <label><i class="fas fa-envelope"></i> Email Address</label>
-          <input type="email" id="settingsEmail" class="settings-input" placeholder="your@email.com" disabled>
-          <span class="field-note">Email cannot be changed</span>
-        </div>
+						<div class="settings-field">
+							<label><i class="fas fa-envelope"></i> Email Address</label>
+							<input
+								type="email"
+								id="settingsEmail"
+								class="settings-input"
+								placeholder="your@email.com"
+								disabled />
+							<span class="field-note">Email cannot be changed</span>
+						</div>
 
-        <div class="settings-field">
-          <label><i class="fas fa-briefcase"></i> Your Niche</label>
-          <input type="text" id="settingsNiche" class="settings-input" placeholder="e.g. Fitness coach, Finance advisor">
-        </div>
+						<div class="settings-field">
+							<label><i class="fas fa-briefcase"></i> Your Niche</label>
+							<input
+								type="text"
+								id="settingsNiche"
+								class="settings-input"
+								placeholder="e.g. Fitness coach, Finance advisor" />
+						</div>
 
-        <div class="settings-field">
-          <label><i class="fas fa-users"></i> Target Audience</label>
-          <input type="text" id="settingsAudience" class="settings-input" placeholder="e.g. Working moms aged 30-45">
-        </div>
+						<div class="settings-field">
+							<label><i class="fas fa-users"></i> Target Audience</label>
+							<input
+								type="text"
+								id="settingsAudience"
+								class="settings-input"
+								placeholder="e.g. Working moms aged 30-45" />
+						</div>
 
-        <div class="settings-field">
-          <label><i class="fas fa-microphone"></i> Brand Tone</label>
-          <input type="text" id="settingsTone" class="settings-input" placeholder="e.g. Motivational, Educational">
-        </div>
+						<div class="settings-field">
+							<label><i class="fas fa-microphone"></i> Brand Tone</label>
+							<input
+								type="text"
+								id="settingsTone"
+								class="settings-input"
+								placeholder="e.g. Motivational, Educational" />
+						</div>
 
-        <button class="btn-save-settings" id="saveProfileBtn">
-          <i class="fas fa-save"></i> Save Changes
-        </button>
-      </div>
-    </div>
+						<button class="btn-save-settings" id="saveProfileBtn">
+							<i class="fas fa-save"></i> Save Changes
+						</button>
+					</div>
+				</div>
 
-    <!-- Preferences Tab -->
-    <div class="settings-panel" id="tab-preferences">
-      <div class="settings-form">
-        <div class="settings-field">
-          <label><i class="fas fa-layer-group"></i> Default Platforms</label>
-          <div class="platform-tags settings-platforms">
-            <div class="platform-tag" data-platform="instagram"><i class="fab fa-instagram"></i> Instagram</div>
-            <div class="platform-tag" data-platform="linkedin"><i class="fab fa-linkedin"></i> LinkedIn</div>
-            <div class="platform-tag" data-platform="tiktok"><i class="fab fa-tiktok"></i> TikTok</div>
-            <div class="platform-tag" data-platform="twitter"><i class="fab fa-twitter"></i> Twitter</div>
-            <div class="platform-tag" data-platform="youtube"><i class="fab fa-youtube"></i> YouTube</div>
-          </div>
-        </div>
+				<!-- Preferences Tab -->
+				<div class="settings-panel" id="tab-preferences">
+					<div class="settings-form">
+						<div class="settings-field">
+							<label
+								><i class="fas fa-layer-group"></i> Default Platforms</label
+							>
+							<div class="platform-tags settings-platforms">
+								<div class="platform-tag" data-platform="instagram">
+									<i class="fab fa-instagram"></i> Instagram
+								</div>
+								<div class="platform-tag" data-platform="linkedin">
+									<i class="fab fa-linkedin"></i> LinkedIn
+								</div>
+								<div class="platform-tag" data-platform="tiktok">
+									<i class="fab fa-tiktok"></i> TikTok
+								</div>
+								<div class="platform-tag" data-platform="twitter">
+									<i class="fab fa-twitter"></i> Twitter
+								</div>
+								<div class="platform-tag" data-platform="youtube">
+									<i class="fab fa-youtube"></i> YouTube
+								</div>
+								<div class="platform-tag" data-platform="facebook">
+									<i class="fab fa-facebook-f"></i> Facebook
+								</div>
+							</div>
+						</div>
 
-        <div class="settings-field">
-          <label><i class="fas fa-moon"></i> Theme</label>
-          <div class="theme-options">
-            <button class="theme-btn active" data-theme="light">
-              <i class="fas fa-sun"></i> Light
-            </button>
-            <button class="theme-btn" data-theme="dark">
-              <i class="fas fa-moon"></i> Dark
-            </button>
-          </div>
-        </div>
+						<div class="settings-field">
+							<label><i class="fas fa-moon"></i> Theme</label>
+							<div class="theme-options">
+								<button class="theme-btn active" data-theme="light">
+									<i class="fas fa-sun"></i> Light
+								</button>
+								<button class="theme-btn" data-theme="dark">
+									<i class="fas fa-moon"></i> Dark
+								</button>
+							</div>
+						</div>
 
-        <button class="btn-save-settings" id="savePreferencesBtn">
-          <i class="fas fa-save"></i> Save Preferences
-        </button>
-      </div>
-    </div>
+						<button class="btn-save-settings" id="savePreferencesBtn">
+							<i class="fas fa-save"></i> Save Preferences
+						</button>
+					</div>
+				</div>
 
-    <!-- Account Tab -->
-    <div class="settings-panel" id="tab-account">
-      <div class="settings-form">
-        <div class="account-info-card">
-          <div class="account-stat">
-            <i class="fas fa-lightbulb"></i>
-            <div>
-              <strong id="statIdeas">0</strong>
-              <span>Ideas Generated</span>
-            </div>
-          </div>
-          <div class="account-stat">
-            <i class="fas fa-calendar"></i>
-            <div>
-              <strong id="statJoined">-</strong>
-              <span>Member Since</span>
-            </div>
-          </div>
-          <div class="account-stat">
-            <i class="fas fa-crown"></i>
-            <div>
-              <strong id="statPlan">Free</strong>
-              <span>Current Plan</span>
-            </div>
-          </div>
-        </div>
+				<!-- Account Tab -->
+				<div class="settings-panel" id="tab-account">
+					<div class="settings-form">
+						<div class="account-info-card">
+							<div class="account-stat">
+								<i class="fas fa-lightbulb"></i>
+								<div>
+									<strong id="statIdeas">0</strong>
+									<span>Ideas Generated</span>
+								</div>
+							</div>
+							<div class="account-stat">
+								<i class="fas fa-calendar"></i>
+								<div>
+									<strong id="statJoined">-</strong>
+									<span>Member Since</span>
+								</div>
+							</div>
+							<div class="account-stat">
+								<i class="fas fa-crown"></i>
+								<div>
+									<strong id="statPlan">Free</strong>
+									<span>Current Plan</span>
+								</div>
+							</div>
+						</div>
 
-        <div class="settings-field">
-          <label><i class="fas fa-lock"></i> Change Password</label>
-          <input type="password" id="newPassword" class="settings-input" placeholder="New password">
-        </div>
-        <div class="settings-field">
-          <input type="password" id="confirmPassword" class="settings-input" placeholder="Confirm new password">
-        </div>
+						<div class="settings-field">
+							<label><i class="fas fa-lock"></i> Change Password</label>
+							<input
+								type="password"
+								id="newPassword"
+								class="settings-input"
+								placeholder="New password" />
+						</div>
+						<div class="settings-field">
+							<input
+								type="password"
+								id="confirmPassword"
+								class="settings-input"
+								placeholder="Confirm new password" />
+						</div>
 
-        <button class="btn-save-settings" id="savePasswordBtn">
-          <i class="fas fa-key"></i> Update Password
-        </button>
+						<button class="btn-save-settings" id="savePasswordBtn">
+							<i class="fas fa-key"></i> Update Password
+						</button>
 
-        <div class="danger-zone">
-          <h4><i class="fas fa-exclamation-triangle"></i> Danger Zone</h4>
-          <button class="btn-danger" id="deleteAccountBtn">
-            <i class="fas fa-trash"></i> Delete Account
-          </button>
-        </div>
-      </div>
-    </div>
+						<div class="danger-zone">
+							<h4><i class="fas fa-exclamation-triangle"></i> Danger Zone</h4>
+							<button class="btn-danger" id="deleteAccountBtn">
+								<i class="fas fa-trash"></i> Delete Account
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
 
-  </div>
-</div>
+		<!-- Main Container -->
+		<div class="main-container">
+			<!-- Generator Panel -->
+			<div class="generator-panel">
+				<div class="panel-header">
+					<div class="panel-icon">
+						<i class="fas fa-bolt"></i>
+					</div>
+					<div>
+						<h2>Generate Ideas</h2>
+					</div>
+				</div>
 
+				<form id="generatorForm">
+					<div class="form-group">
+						<label for="niche">
+							Your Niche
+							<span class="optional">*</span>
+						</label>
+						<textarea
+							id="niche"
+							class="form-input form-textarea"
+							placeholder="e.g., AI expert, fitness coach, financial advisor, life coach, or any niche you specialize in"
+							required></textarea>
+					</div>
 
-<!-- Main Container -->
-<div class="main-container">
-  <!-- Generator Panel -->
-  <div class="generator-panel">
-    <div class="panel-header">
-      <div class="panel-icon">
-        <i class="fas fa-bolt"></i>
-      </div>
-      <div>
-        <h2>Generate Ideas</h2>
-      </div>
-    </div>
+					<div class="form-group">
+						<label for="audience">
+							Target Audience
+							<span class="optional">(optional)</span>
+						</label>
+						<input
+							type="text"
+							id="audience"
+							class="form-input"
+							placeholder="e.g., 30-45 year old working moms" />
+					</div>
 
-    <form id="generatorForm">
-      <div class="form-group">
-        <label for="niche">
-          Your Niche
-          <span class="optional">*</span>
-        </label>
-        <textarea 
-          id="niche" 
-          class="form-input form-textarea" 
-          placeholder="e.g., AI expert, fitness coach, financial advisor, life coach, or any niche you specialize in"
-          required
-        ></textarea>
-      </div>
+					<div class="form-group">
+						<label>
+							Platforms
+							<span class="optional">(select 1-3)</span>
+						</label>
+						<div class="platform-tags">
+							<div class="platform-tag" data-platform="instagram">
+								<i class="fab fa-instagram"></i> Instagram
+							</div>
+							<div class="platform-tag" data-platform="linkedin">
+								<i class="fab fa-linkedin"></i> LinkedIn
+							</div>
+							<div class="platform-tag" data-platform="tiktok">
+								<i class="fab fa-tiktok"></i> TikTok
+							</div>
+							<div class="platform-tag" data-platform="twitter">
+								<i class="fab fa-twitter"></i> Twitter
+							</div>
+							<div class="platform-tag" data-platform="youtube">
+								<i class="fab fa-youtube"></i> YouTube
+							</div>
+							<div class="platform-tag" data-platform="facebook">
+								<i class="fab fa-facebook-f"></i> Facebook
+							</div>
+						</div>
+					</div>
 
-      <div class="form-group">
-        <label for="audience">
-          Target Audience
-          <span class="optional">(optional)</span>
-        </label>
-        <input 
-          type="text" 
-          id="audience" 
-          class="form-input" 
-          placeholder="e.g., 30-45 year old working moms"
-        >
-      </div>
+					<div class="form-group">
+						<label for="tone">
+							Brand Tone
+							<span class="optional">(optional)</span>
+						</label>
+						<input
+							type="text"
+							id="tone"
+							class="form-input"
+							placeholder="e.g., Motivational, educational, humorous, affirmative" />
+					</div>
 
-      <div class="form-group">
-        <label>
-          Platforms
-          <span class="optional">(select 1-3)</span>
-        </label>
-        <div class="platform-tags">
-          <div class="platform-tag" data-platform="instagram">
-            <i class="fab fa-instagram"></i> Instagram
-          </div>
-          <div class="platform-tag" data-platform="linkedin">
-            <i class="fab fa-linkedin"></i> LinkedIn
-          </div>
-          <div class="platform-tag" data-platform="tiktok">
-            <i class="fab fa-tiktok"></i> TikTok
-          </div>
-          <div class="platform-tag" data-platform="twitter">
-            <i class="fab fa-twitter"></i> Twitter
-          </div>
-          <div class="platform-tag" data-platform="youtube">
-            <i class="fab fa-youtube"></i> YouTube
-          </div>
-        </div>
-      </div>
+					<button type="submit" class="btn-generate" id="generateBtn">
+						<i class="fas fa-magic"></i>
+						Generate 15 Ideas
+					</button>
+				</form>
 
-      <div class="form-group">
-        <label for="tone">
-          Brand Tone
-          <span class="optional">(optional)</span>
-        </label>
-        <input 
-          type="text" 
-          id="tone" 
-          class="form-input" 
-          placeholder="e.g., Motivational, educational, humorous, affirmative"
-        >
-      </div>
+				<div class="quota-info">
+					<strong><i class="fas fa-gift"></i> Free Tier</strong>
+					<p>
+						You get 15 AI-generated content ideas for free. Upgrade to Creator
+						plan for unlimited generations.
+					</p>
+				</div>
+			</div>
 
-      <button type="submit" class="btn-generate" id="generateBtn">
-        <i class="fas fa-magic"></i>
-        Generate 15 Ideas
-      </button>
-    </form>
+			<!-- Results Panel -->
+			<div class="results-panel">
+				<div class="results-header">
+					<div class="results-title">
+						<h2>Your Ideas</h2>
+						<span class="results-count" id="resultsCount">0 ideas</span>
+					</div>
+					<button class="btn-export" id="exportBtn">
+						<i class="fas fa-download"></i>
+						Export
+					</button>
+				</div>
 
-    <div class="quota-info">
-      <strong><i class="fas fa-gift"></i> Free Tier</strong>
-      <p>You get 15 AI-generated content ideas for free. Upgrade to Creator plan for unlimited generations.</p>
-    </div>
-  </div>
+				<!-- Empty State -->
+				<div class="empty-state" id="emptyState">
+					<div class="empty-icon">
+						<i class="fas fa-lightbulb"></i>
+					</div>
+					<h3>Ready to spark some ideas?</h3>
+					<p>
+						Fill in your niche details on the left and hit "Generate" to get 10
+						AI-crafted content ideas tailored specifically for your audience.
+					</p>
+				</div>
 
-  <!-- Results Panel -->
-  <div class="results-panel">
-    <div class="results-header">
-      <div class="results-title">
-        <h2>Your Ideas</h2>
-        <span class="results-count" id="resultsCount">0 ideas</span>
-      </div>
-      <button class="btn-export" id="exportBtn" style="display: none;">
-        <i class="fas fa-download"></i>
-        Export
-      </button>
-    </div>
+				<!-- Loading State -->
+				<div class="loading-state" id="loadingState">
+					<div class="spinner"></div>
+					<p>Generating your ideas...</p>
+					<small>This usually takes 10-15 seconds</small>
+				</div>
 
-    <!-- Empty State -->
-    <div class="empty-state" id="emptyState">
-      <div class="empty-icon">
-        <i class="fas fa-lightbulb"></i>
-      </div>
-      <h3>Ready to spark some ideas?</h3>
-      <p>
-        Fill in your niche details on the left and hit "Generate" to get 10 AI-crafted content ideas tailored specifically for your audience.
-      </p>
-    </div>
+				<!-- Error State -->
+				<div class="error-state" id="errorState">
+					<div class="error-icon">
+						<i class="fas fa-exclamation-triangle"></i>
+					</div>
+					<h3>Oops! Something went wrong</h3>
+					<p id="errorMessage">We couldn't generate ideas. Please try again.</p>
+					<button class="btn-retry" id="retryBtn">
+						<i class="fas fa-redo"></i> Try Again
+					</button>
+				</div>
 
-    <!-- Loading State -->
-    <div class="loading-state" id="loadingState">
-      <div class="spinner"></div>
-      <p>Generating your ideas...</p>
-      <small>This usually takes 10-15 seconds</small>
-    </div>
+				<!-- Ideas List -->
+				<div class="ideas-list" id="ideasList"></div>
+			</div>
+		</div>
 
-    <!-- Error State -->
-    <div class="error-state" id="errorState">
-      <div class="error-icon">
-        <i class="fas fa-exclamation-triangle"></i>
-      </div>
-      <h3>Oops! Something went wrong</h3>
-      <p id="errorMessage">We couldn't generate ideas. Please try again.</p>
-      <button class="btn-retry" id="retryBtn">
-        <i class="fas fa-redo"></i> Try Again
-      </button>
-    </div>
+		<div class="toast" id="toast">
+			<i class="fas fa-check-circle"></i>
+			<span id="toastMessage">Copied!</span>
+		</div>
 
-    <!-- Ideas List -->
-    <div class="ideas-list" id="ideasList">
-    </div>
-  </div>
-</div>
+		<!-- ── REVIEW MODAL ──────────────────────────────────────────── -->
+		<div
+			class="ie-modal-overlay hidden"
+			id="reviewModal"
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="reviewModalTitle">
+			<div class="ie-modal-box ie-modal-box--review">
+				<button
+					class="ie-modal-close"
+					id="closeReviewModal"
+					aria-label="Close review modal">
+					<i class="fas fa-times"></i>
+				</button>
 
-<div class="toast" id="toast">
-  <i class="fas fa-check-circle"></i>
-  <span id="toastMessage">Copied!</span>
-</div>
+				<div class="review-modal-header">
+					<div class="review-modal-icon">⚡</div>
+					<h3 id="reviewModalTitle">Enjoying Idea-Engne?</h3>
+					<p>Takes 10 seconds — helps us grow and improve for you.</p>
+				</div>
 
+				<div class="star-rating-group">
+					<div
+						class="star-rating"
+						id="starRating"
+						role="radiogroup"
+						aria-label="Star rating">
+						<span
+							data-value="1"
+							role="radio"
+							aria-checked="false"
+							aria-label="1 star"
+							tabindex="0"
+							>☆</span
+						>
+						<span
+							data-value="2"
+							role="radio"
+							aria-checked="false"
+							aria-label="2 stars"
+							tabindex="0"
+							>☆</span
+						>
+						<span
+							data-value="3"
+							role="radio"
+							aria-checked="false"
+							aria-label="3 stars"
+							tabindex="0"
+							>☆</span
+						>
+						<span
+							data-value="4"
+							role="radio"
+							aria-checked="false"
+							aria-label="4 stars"
+							tabindex="0"
+							>☆</span
+						>
+						<span
+							data-value="5"
+							role="radio"
+							aria-checked="false"
+							aria-label="5 stars"
+							tabindex="0"
+							>☆</span
+						>
+					</div>
+					<p class="star-label" id="starLabel">Tap a star to rate</p>
+				</div>
 
-<!-- ── REVIEW MODAL  -->
-<div class="ie-modal-backdrop hidden" id="reviewModal" role="dialog" aria-modal="true" aria-labelledby="reviewModalTitle">
-  <div class="ie-modal ie-review-modal">
+				<div class="review-textarea-wrap">
+					<textarea
+						id="reviewText"
+						class="review-textarea"
+						placeholder="What do you love most? (optional)"
+						rows="3"
+						maxlength="300"></textarea>
+					<span class="review-char-count"
+						><span id="charCount">0</span>/300</span
+					>
+				</div>
 
-    <button class="ie-modal-close" id="closeReviewModal" aria-label="Close">
-      <i class="fas fa-times"></i>
-    </button>
+				<button class="ie-btn-primary review-submit-btn" id="submitReviewBtn">
+					Submit Review
+				</button>
 
-    <div class="ie-review-header">
-      <div class="ie-review-emoji">⚡</div>
-      <h3 id="reviewModalTitle">How's Idea-Engne working for you?</h3>
-      <p>Your feedback helps us improve, takes less than 30 seconds.</p>
-    </div>
+				<button class="review-skip-btn" id="skipReviewBtn">Not now</button>
+			</div>
+		</div>
 
-    <div class="ie-star-row">
-      <div class="ie-star-rating" id="starRating" role="group" aria-label="Star rating">
-        <span data-value="1" role="radio" aria-label="1 star" tabindex="0">☆</span>
-        <span data-value="2" role="radio" aria-label="2 stars" tabindex="0">☆</span>
-        <span data-value="3" role="radio" aria-label="3 stars" tabindex="0">☆</span>
-        <span data-value="4" role="radio" aria-label="4 stars" tabindex="0">☆</span>
-        <span data-value="5" role="radio" aria-label="5 stars" tabindex="0">☆</span>
-      </div>
-      <span class="ie-star-label" id="starLabel"></span>
-    </div>
+		<!-- ── SAVED IDEAS MODAL  -->
+		<div
+			class="ie-modal-overlay hidden"
+			id="savedIdeasModal"
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="savedIdeasTitle">
+			<div class="ie-modal-box ie-modal-box--wide">
+				<div class="ie-modal-header">
+					<div class="ie-modal-header-left">
+						<i class="fas fa-bookmark"></i>
+						<h3 id="savedIdeasTitle">Saved Ideas</h3>
+					</div>
+					<div class="ie-modal-header-right">
+						<button class="ie-btn-ghost" id="clearAllSavedBtn">
+							<i class="fas fa-trash"></i> Clear All
+						</button>
+						<button
+							class="ie-modal-close"
+							id="closeSavedModal"
+							aria-label="Close">
+							<i class="fas fa-times"></i>
+						</button>
+					</div>
+				</div>
 
-    <div class="ie-review-field">
-      <label for="reviewText">What do you love? <span class="ie-optional">(optional)</span></label>
-      <textarea id="reviewText" placeholder="e.g. The ideas are super specific to my niche and saved me hours every week…" rows="3" maxlength="300"></textarea>
-      <div class="ie-char-count"><span id="charCount">0</span>/300</div>
-    </div>
+				<div id="savedIdeasList" class="saved-ideas-list">
+					<!-- Populated by JS -->
+				</div>
+			</div>
+		</div>
 
-    <div class="ie-review-actions">
-      <button class="ie-btn-submit" id="submitReviewBtn">
-        <i class="fas fa-paper-plane"></i> Submit Review
-      </button>
-      <button class="ie-btn-skip" id="skipReviewBtn">Maybe later</button>
-    </div>
-
-  </div>
-</div>
-
-
-<!-- ── SAVED IDEAS MODAL -->
-<div class="ie-modal-backdrop hidden" id="savedIdeasModal" role="dialog" aria-modal="true" aria-labelledby="savedModalTitle">
-  <div class="ie-modal ie-saved-modal">
-
-    <div class="ie-modal-header">
-      <h3 id="savedModalTitle"><i class="fas fa-bookmark"></i> Saved Ideas</h3>
-      <div class="ie-modal-header-actions">
-        <button class="ie-btn-clear" id="clearAllSavedBtn">
-          <i class="fas fa-trash"></i> Clear All
-        </button>
-        <button class="ie-modal-close" id="closeSavedModal" aria-label="Close">
-          <i class="fas fa-times"></i>
-        </button>
-      </div>
-    </div>
-
-    <div class="ie-saved-list" id="savedIdeasList">
-    </div>
-
-  </div>
-</div>
-
-<!-- Load config first, then app -->
-<script src="config.js"></script>                              
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js" type="module"></script>
-<script src="app.js"></script>
-
-</body>
+		<!-- Load config first, then app -->
+		<script src="config.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+		<script src="supabase.js" type="module"></script>
+		<script src="app.js"></script>
+	</body>
 </html>

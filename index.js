@@ -228,7 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// ─── ANIMATED COUNTER 
+// ─── ANIMATED COUNTER ────────────────────────────────────────
 function animateCounter(el, target, duration = 2000) {
   if (!el || typeof target !== 'number' || Number.isNaN(target) || target < 0) return;
 
@@ -263,42 +263,45 @@ const counterObserver = new IntersectionObserver((entries) => {
 
 document.querySelectorAll('[data-count]').forEach(el => counterObserver.observe(el));
 
-// ─── DYNAMIC STATS (Supabase) 
-// Fetches real numbers from platform_stats table and updates data-count
-// so the existing animated counter picks them up on scroll.
+// ─── DYNAMIC STATS (Supabase) ─────────────────────────────────
+// FIX: Do NOT rely on counterObserver for Supabase values.
+// Hero stats are above the fold — counterObserver fires at ~0ms with
+// hardcoded data-count, unobserves, then loadDynamicStats runs at 300ms
+// and has no way to re-trigger the observer.
+// Solution: fetch first, then animate directly — bypass the observer.
 
 async function loadDynamicStats() {
+  // Fallback values from index.html — used if Supabase fetch fails or returns 0
+  const fallback = { total_users: 12000, total_ideas_generated: 500000, satisfaction_percentage: 98 };
+
+  // Selectors match the stat elements in index.html hero section
+  const statEls = {
+    users:        document.querySelector('[data-count="12000"]'),
+    ideas:        document.querySelector('[data-count="500000"]'),
+    satisfaction: document.querySelector('[data-count="98"]')
+  };
+
+  // Always animate — with real values if available, fallback otherwise
+  const animate = (stats) => {
+    if (statEls.users)        animateCounter(statEls.users,        stats.total_users             || fallback.total_users);
+    if (statEls.ideas)        animateCounter(statEls.ideas,        stats.total_ideas_generated   || fallback.total_ideas_generated);
+    if (statEls.satisfaction) animateCounter(statEls.satisfaction, stats.satisfaction_percentage || fallback.satisfaction_percentage);
+  };
+
   try {
-    // window.getPlatformStats is exposed by supabase.js
-    if (typeof window.getPlatformStats !== 'function') return;
-
+    if (typeof window.getPlatformStats !== 'function') {
+      animate(fallback);
+      return;
+    }
     const stats = await window.getPlatformStats();
-    if (!stats) return;
-
-    // Map stat fields to the data-count elements in index.html
-    const statMap = [
-      { selector: '[data-count="12000"]', value: stats.total_users            },
-      { selector: '[data-count="500000"]', value: stats.total_ideas_generated },
-      { selector: '[data-count="98"]',    value: stats.satisfaction_percentage }
-    ];
-
-    statMap.forEach(({ selector, value }) => {
-      if (!value) return;
-      const el = document.querySelector(selector);
-      if (!el) return;
-      // Update data-count so counterObserver uses real value
-      el.dataset.count = value;
-      // If element is already visible (observer already fired), update text directly
-      if (el.textContent !== '0') animateCounter(el, value);
-    });
-
+    animate(stats || fallback);
   } catch (err) {
-    console.warn('Dynamic stats load failed — using hardcoded values:', err.message);
-    // Graceful fallback: hardcoded values in HTML remain visible
+    console.warn('Dynamic stats load failed — using fallback values:', err.message);
+    animate(fallback);
   }
 }
 
-// ─── DYNAMIC TESTIMONIALS (Supabase) 
+// ─── DYNAMIC TESTIMONIALS (Supabase) ─────────────────────────
 // Fetches approved testimonials and replaces static cards in the grid.
 // If DB has no approved rows, static cards remain untouched.
 
@@ -353,7 +356,7 @@ function escapeHtmlLanding(text) {
   return String(text).replace(/[&<>"']/g, m => map[m]);
 }
 
-// ─── FAQ ACCORDION 
+// ─── FAQ ACCORDION ────────────────────────────────────────────
 document.querySelectorAll('.faq-question').forEach(btn => {
   btn.addEventListener('click', () => {
     const item   = btn.closest('.faq-item');
@@ -363,7 +366,7 @@ document.querySelectorAll('.faq-question').forEach(btn => {
   });
 });
 
-// ─── CTA MODAL 
+// ─── CTA MODAL ────────────────────────────────────────────────
 class CTAModal {
   constructor() {
     this.modal = document.getElementById('ctaModal');
@@ -408,7 +411,7 @@ class CTAModal {
   }
 }
 
-// ─── SMOOTH SCROLL 
+// ─── SMOOTH SCROLL ────────────────────────────────────────────
 document.querySelectorAll('a[href^="#"]').forEach(link => {
   link.addEventListener('click', (e) => {
     const target = document.querySelector(link.getAttribute('href'));
@@ -419,16 +422,18 @@ document.querySelectorAll('a[href^="#"]').forEach(link => {
   });
 });
 
-// ─── INIT 
+// ─── INIT ─────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   new CTAModal();
 
-  // Load dynamic data from Supabase
-  // Small delay ensures supabase.js module has fully executed
+  // Load dynamic data from Supabase.
+  // 500ms delay ensures supabase.js module globals (window.getPlatformStats etc.)
+  // are fully set before we call them. Module scripts are deferred but execution
+  // order isn't guaranteed to the ms — 500ms is safe across all browsers.
   setTimeout(() => {
     loadDynamicStats();
     loadDynamicTestimonials();
-  }, 300);
+  }, 500);
 });
 
 console.log('%c⚡ Idea-Engne', 'font-size:18px;font-weight:700;color:#4f39f6;');
