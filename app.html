@@ -4,21 +4,20 @@
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Dashboard</title>
+		<link rel="icon" type="image/svg+xml" href="assets/icons/idea-engne-icon.svg" />
 		<link
 			rel="stylesheet"
 			href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-		<link rel="stylesheet" href="assets/css/app.css" />
-		<link rel="stylesheet" href="assets/css/modals.css" />
+		<link rel="stylesheet" href="assets/css/base.css" />
+		<link rel="stylesheet" href="assets/css/pages/dashboard.css" />
+		<link rel="stylesheet" href="assets/css/components/modals.css" />
 	</head>
 	<body>
 		<header>
 			<div class="header-inner">
 				<a href="index.html" class="brand">
 					<div class="brand-icon">
-						<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-							<path
-								d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-						</svg>
+						<img src="assets/icons/idea-engne-icon.svg" alt="Idea-Engne logo" />
 					</div>
 					Idea-Engne
 				</a>
@@ -549,7 +548,7 @@
 		<!-- Load config first, then app -->
 		<script src="config.js"></script>
 		<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-		<script src="assets/js/supabase.js" type="module"></script>
-		<script src="assets/js/app.js"></script>
+		<script src="assets/js/shared/supabase.js" type="module"></script>
+		<script src="assets/js/pages/dashboard.js"></script>
 	</body>
 </html>

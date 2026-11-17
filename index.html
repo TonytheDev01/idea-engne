@@ -15,6 +15,7 @@
 		<meta property="og:type" content="website" />
 		<meta name="twitter:card" content="summary_large_image" />
 		<title>Idea-Engne | AI Social Media Idea Generator</title>
+		<link rel="icon" type="image/svg+xml" href="assets/icons/idea-engne-icon.svg" />
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 		<link
@@ -23,7 +24,8 @@
 		<link
 			rel="stylesheet"
 			href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-		<link rel="stylesheet" href="assets/css/index.css" />
+		<link rel="stylesheet" href="assets/css/base.css" />
+		<link rel="stylesheet" href="assets/css/pages/landing.css" />
 	</head>
 	<body>
 		<a href="#hero" class="skip-link">Skip to main content</a>
@@ -34,19 +36,10 @@
 				<!-- Brand -->
 				<a href="#hero" class="brand" aria-label="Idea-Engne home">
 					<div class="brand-icon" aria-hidden="true">
-						<svg
-							viewBox="0 0 24 24"
-							xmlns="http://www.w3.org/2000/svg"
-							aria-hidden="true"
-							focusable="false">
-							<path
-								d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
-								stroke="white"
-								stroke-width="2"
-								fill="none"
-								stroke-linecap="round"
-								stroke-linejoin="round" />
-						</svg>
+						<img
+							src="assets/icons/idea-engne-icon.svg"
+							alt="Idea-Engne logo"
+						/>
 					</div>
 					Idea-Engne
 				</a>
@@ -1082,7 +1075,7 @@
 					</div>
 
 					<!-- Team -->
-					<div class="pricing-card fade-in stagger-3">
+					<div class="pricing-card pricing-card--team fade-in stagger-3">
 						<div class="plan-name">Team</div>
 						<div class="plan-price"><sup>$</sup>45<span>/mo</span></div>
 						<p class="plan-desc">
@@ -1372,19 +1365,10 @@
 					<div class="footer-brand">
 						<a href="#hero" class="brand" aria-label="Idea-Engne home">
 							<div class="brand-icon" aria-hidden="true">
-								<svg
-									viewBox="0 0 24 24"
-									xmlns="http://www.w3.org/2000/svg"
-									aria-hidden="true"
-									focusable="false">
-									<path
-										d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
-										stroke="white"
-										stroke-width="2"
-										fill="none"
-										stroke-linecap="round"
-										stroke-linejoin="round" />
-								</svg>
+								<img
+									src="assets/icons/idea-engne-icon.svg"
+									alt="Idea-Engne logo"
+								/>
 							</div>
 							Idea-Engne
 						</a>
@@ -1554,7 +1538,7 @@
 		</div>
 
 		<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-		<script src="assets/js/supabase.js" type="module"></script>
-		<script src="assets/js/index.js" type="module"></script>
+		<script src="assets/js/shared/supabase.js" type="module"></script>
+		<script src="assets/js/pages/landing.js" type="module"></script>
 	</body>
 </html>
