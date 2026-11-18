@@ -1,5 +1,7 @@
 'use strict';
 
+import { StatsService } from '../shared/stats-service.js';
+
 // IDEA-ENGNE - LANDING PAGE SCRIPTS
 // Built by Anthony Michael (TonyDev)
 
@@ -112,7 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (storedData) {
     try { user = JSON.parse(storedData); }
-    catch (error) { console.warn('Corrupted user data in localStorage', error); }
+    catch { user = null; }
   }
 
   if (loggedInUser && user) {
@@ -228,76 +230,70 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// ─── ANIMATED COUNTER ────────────────────────────────────────
-function animateCounter(el, target, duration = 2000) {
-  if (!el || typeof target !== 'number' || Number.isNaN(target) || target < 0) return;
+// ─── PUBLIC STATS ─────────────────────────────────────────────
+function formatStatCount(value) {
+  const count = Math.floor(value);
+  return count >= 10000
+    ? new Intl.NumberFormat('en-US', {
+        notation: 'compact',
+        maximumFractionDigits: 1
+      }).format(count)
+    : count.toLocaleString('en-US');
+}
 
-  const isLarge   = target >= 10000;
-  const increment = target / (duration / 16);
-  let current     = 0;
+function animateCounter(el, target, isRating = false, duration = 2000) {
+  const start = performance.now();
 
-  const update = () => {
-    current = Math.min(current + increment, target);
-    if (isLarge) {
-      el.textContent = current >= 1000
-        ? (current / 1000).toFixed(current >= 100000 ? 0 : 1) + 'K+'
-        : Math.floor(current).toLocaleString();
-    } else {
-      el.textContent = Math.floor(current) + (target === 98 ? '%' : '+');
-    }
-    if (current < target) requestAnimationFrame(update);
+  const update = (now) => {
+    const progress = Math.min((now - start) / duration, 1);
+    const current = target * progress;
+    el.textContent = isRating
+      ? `${current.toFixed(1)}/5`
+      : formatStatCount(current);
+
+    if (progress < 1) requestAnimationFrame(update);
   };
+
   requestAnimationFrame(update);
 }
 
+const statTargets = new WeakMap();
 const counterObserver = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      const el     = entry.target;
-      const target = parseInt(el.dataset.count);
-      animateCounter(el, target);
-      counterObserver.unobserve(el);
-    }
+  entries.forEach((entry) => {
+    if (!entry.isIntersecting) return;
+
+    const el = entry.target;
+    const target = statTargets.get(el);
+    if (target === undefined) return;
+
+    animateCounter(el, target, el.dataset.statKey === 'avg_rating');
+    counterObserver.unobserve(el);
   });
 }, { threshold: 0.5 });
 
-document.querySelectorAll('[data-count]').forEach(el => counterObserver.observe(el));
-
-// ─── DYNAMIC STATS (Supabase) ─────────────────────────────────
-// FIX: Do NOT rely on counterObserver for Supabase values.
-// Hero stats are above the fold — counterObserver fires at ~0ms with
-// hardcoded data-count, unobserves, then loadDynamicStats runs at 300ms
-// and has no way to re-trigger the observer.
-// Solution: fetch first, then animate directly — bypass the observer.
-
 async function loadDynamicStats() {
-  // Fallback values from index.html — used if Supabase fetch fails or returns 0
-  const fallback = { total_users: 12000, total_ideas_generated: 500000, satisfaction_percentage: 98 };
-
-  // Selectors match the stat elements in index.html hero section
-  const statEls = {
-    users:        document.querySelector('[data-count="12000"]'),
-    ideas:        document.querySelector('[data-count="500000"]'),
-    satisfaction: document.querySelector('[data-count="98"]')
-  };
-
-  // Always animate — with real values if available, fallback otherwise
-  const animate = (stats) => {
-    if (statEls.users)        animateCounter(statEls.users,        stats.total_users             || fallback.total_users);
-    if (statEls.ideas)        animateCounter(statEls.ideas,        stats.total_ideas_generated   || fallback.total_ideas_generated);
-    if (statEls.satisfaction) animateCounter(statEls.satisfaction, stats.satisfaction_percentage || fallback.satisfaction_percentage);
-  };
+  const statElements = document.querySelectorAll('[data-stat-key]');
 
   try {
-    if (typeof window.getPlatformStats !== 'function') {
-      animate(fallback);
-      return;
-    }
-    const stats = await window.getPlatformStats();
-    animate(stats || fallback);
-  } catch (err) {
-    console.warn('Dynamic stats load failed — using fallback values:', err.message);
-    animate(fallback);
+    const statsService = new StatsService(window.supabaseClient);
+    const stats = await statsService.getPublicStats();
+
+    statElements.forEach((el) => {
+      const key = el.dataset.statKey;
+      const value = stats[key];
+
+      if (key === 'avg_rating' && value === null) {
+        el.closest('.stat-item, .proof-item')?.remove();
+        return;
+      }
+
+      statTargets.set(el, value);
+      counterObserver.observe(el);
+    });
+  } catch {
+    statElements.forEach((el) => {
+      el.textContent = '-';
+    });
   }
 }
 
@@ -326,7 +322,7 @@ async function loadDynamicTestimonials() {
       return `
         <article class="testimonial-card fade-in ${stagger}">
           <div class="testimonial-stars" aria-label="${ariaLabel}">${stars}</div>
-          <p class="testimonial-text">"${escapeHtmlLanding(t.message)}"</p>
+          <p class="testimonial-text">"${escapeHtmlLanding(t.content)}"</p>
           <div class="testimonial-author">
             <div class="author-avatar" aria-hidden="true"
                  style="width:45px;height:45px;border-radius:50%;background:var(--primary);
@@ -346,8 +342,12 @@ async function loadDynamicTestimonials() {
     // Re-observe new cards for fade-in animation
     grid.querySelectorAll('.fade-in').forEach(el => fadeObserver.observe(el));
 
-  } catch (err) {
-    console.warn('Dynamic testimonials load failed — using static cards:', err.message);
+  } catch {
+    const grid = document.querySelector('.testimonials-grid');
+    if (grid && !grid.querySelector('.testimonials-empty-state')) {
+      grid.innerHTML =
+        '<p class="testimonials-empty-state">No reviews yet. Be the first to share feedback.</p>';
+    }
   }
 }
 
@@ -426,15 +426,6 @@ document.querySelectorAll('a[href^="#"]').forEach(link => {
 document.addEventListener('DOMContentLoaded', () => {
   new CTAModal();
 
-  // Load dynamic data from Supabase.
-  // 500ms delay ensures supabase.js module globals (window.getPlatformStats etc.)
-  // are fully set before we call them. Module scripts are deferred but execution
-  // order isn't guaranteed to the ms — 500ms is safe across all browsers.
-  setTimeout(() => {
-    loadDynamicStats();
-    loadDynamicTestimonials();
-  }, 500);
+  loadDynamicStats();
+  loadDynamicTestimonials();
 });
-
-console.log('%c⚡ Idea-Engne', 'font-size:18px;font-weight:700;color:#4f39f6;');
-console.log('%c→ GitHub: github.com/TonytheDev01', 'font-size:13px;color:#666;');

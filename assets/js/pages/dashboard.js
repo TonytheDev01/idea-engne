@@ -3,9 +3,6 @@
 // IDEA-ENGNE DASHBOARD
 // Built by Anthony Michael (TonyDev)
 
-// ─── GROQ CONFIG 
-const AI_MODEL = "llama-3.3-70b-versatile";
-
 // ─── STATE 
 let userData = null;
 let platformTags = null;
@@ -19,33 +16,86 @@ let form,
 	resultsCount,
 	exportBtn;
 
-// ─── INITIALIZE USER 
-function initializeUser() {
-	const userEmail = localStorage.getItem("ideaEngneUser");
+function clearUserFlags() {
+	["ideaEngneUser", "ideaEngneUserData", "ideaEngneRememberMe"].forEach((key) =>
+		localStorage.removeItem(key)
+	);
+}
+
+async function getAuthenticatedSession() {
+	const auth = window.supabaseClient?.auth;
+	const result =
+		auth && typeof auth.getSession === "function"
+			? await Promise.resolve()
+					.then(() => auth.getSession())
+					.catch(() => null)
+			: null;
+	const session =
+		result && !result.error ? result.data?.session : null;
+
+	if (!session?.access_token || !session.user?.id) {
+		clearUserFlags();
+		window.location.href = "signup.html";
+		return null;
+	}
+
+	return session;
+}
+
+document.body.style.visibility = "hidden";
+
+// ─── INITIALIZE USER
+function initializeUser(session) {
+	const cachedEmail = localStorage.getItem("ideaEngneUser");
 	const storedUserData = localStorage.getItem("ideaEngneUserData");
-	if (!userEmail || !storedUserData) {
-		window.location.href = "signup.html";
-		return false;
+	let parsedData = {};
+	if (storedUserData) {
+		try {
+			const cachedData = JSON.parse(storedUserData);
+			if (cachedData && typeof cachedData === "object" && !Array.isArray(cachedData))
+				parsedData = cachedData;
+		} catch {
+			localStorage.removeItem("ideaEngneUserData");
+		}
 	}
 
-	let parsedData;
-	try {
-		parsedData = JSON.parse(storedUserData);
-	} catch (err) {
-		console.error("Corrupted user data:", err);
-		localStorage.removeItem("ideaEngneUserData");
-		window.location.href = "signup.html";
-		return false;
-	}
-
+	const metadata = session.user.user_metadata || {};
+	const metadataName =
+		[metadata.full_name, metadata.name].find(
+			(value) => typeof value === "string" && value.trim()
+		) || "";
+	const userEmail =
+		session.user.email ||
+		(typeof parsedData.email === "string" ? parsedData.email : "") ||
+		cachedEmail ||
+		"User";
 	userData = {
-		subscription: "free",
-		freeIdeasRemaining: 15,
-		totalIdeasGenerated: 0,
-		preferences: {},
 		...parsedData,
+		subscription:
+			typeof parsedData.subscription === "string"
+				? parsedData.subscription
+				: "free",
+		freeIdeasRemaining: Number.isFinite(parsedData.freeIdeasRemaining)
+			? parsedData.freeIdeasRemaining
+			: 15,
+		totalIdeasGenerated: Number.isFinite(parsedData.totalIdeasGenerated)
+			? parsedData.totalIdeasGenerated
+			: 0,
+		id: session.user.id,
+		email: session.user.email || userEmail,
+		name:
+			(typeof parsedData.name === "string" && parsedData.name) ||
+			metadataName ||
+			userEmail,
+		preferences:
+			parsedData.preferences &&
+			typeof parsedData.preferences === "object" &&
+			!Array.isArray(parsedData.preferences)
+				? parsedData.preferences
+				: {},
 	};
-	userData.preferences = userData.preferences || {};
+	localStorage.setItem("ideaEngneUser", userEmail);
+	localStorage.setItem("ideaEngneUserData", JSON.stringify(userData));
 
 	const initials = userData.name
 		? userData.name
@@ -74,8 +124,8 @@ function initializeUser() {
 		const el = document.getElementById(id);
 		if (!el) return;
 		el.innerHTML = img
-			? `<img src="${img}" alt="Avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
-			: initials;
+			? `<img src="${escapeHtml(img)}" alt="Avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+			: escapeHtml(initials);
 	};
 	setAvatar("userAvatar", userData.avatar_url);
 	setAvatar("dropdownAvatar", userData.avatar_url);
@@ -92,15 +142,31 @@ function updateQuotaDisplay() {
 	el.innerHTML =
 		sub === "free"
 			? `<strong><i class="fas fa-gift"></i> Free Tier</strong>
-       <p>You have <strong>${rem} free idea${rem === 1 ? "" : "s"}</strong> remaining.
+       <p>You have <strong>${escapeHtml(rem)} free idea${rem === 1 ? "" : "s"}</strong> remaining.
        ${rem === 0 ? '<a href="index.html#pricing" style="color:var(--primary);font-weight:700;">Upgrade to Pro</a> for unlimited.' : "Upgrade for unlimited generations."}</p>`
-			: `<strong><i class="fas fa-crown"></i> ${sub.charAt(0).toUpperCase() + sub.slice(1)} Plan</strong>
-       <p>Unlimited generation · <strong>${userData.totalIdeasGenerated || 0} ideas</strong> this month.</p>`;
+			: `<strong><i class="fas fa-crown"></i> ${escapeHtml(sub.charAt(0).toUpperCase() + sub.slice(1))} Plan</strong>
+       <p>Unlimited generation · <strong>${escapeHtml(userData.totalIdeasGenerated || 0)} ideas</strong> this month.</p>`;
 }
 
 // ─── DOM READY 
-document.addEventListener("DOMContentLoaded", () => {
-	if (!initializeUser()) return;
+document.addEventListener("DOMContentLoaded", async () => {
+	try {
+		await initializeDashboard();
+	} catch {
+		const bootstrapError = document.getElementById("errorMessage");
+		const bootstrapErrorState = document.getElementById("errorState");
+		if (bootstrapError)
+			bootstrapError.textContent = "Unable to initialize the dashboard. Please reload.";
+		if (bootstrapErrorState) bootstrapErrorState.classList.add("active");
+	} finally {
+		document.body.style.visibility = "";
+	}
+});
+
+async function initializeDashboard() {
+	const session = await getAuthenticatedSession();
+	if (!session) return;
+	initializeUser(session);
 
 	// ── CRITICAL FIX: modal inits run BEFORE the form null-guard so they
 	//   always execute regardless of whether #generatorForm exists.
@@ -204,14 +270,14 @@ document.addEventListener("DOMContentLoaded", () => {
 		const preview = document.getElementById("avatarPreview");
 		if (preview)
 			preview.innerHTML = userData.avatar_url
-				? `<img src="${userData.avatar_url}" alt="Avatar">`
+				? `<img src="${escapeHtml(userData.avatar_url)}" alt="Avatar">`
 				: userData.name
-					? userData.name
+					? escapeHtml(userData.name
 							.split(" ")
 							.map((n) => n[0])
 							.join("")
 							.substring(0, 2)
-							.toUpperCase()
+							.toUpperCase())
 					: "?";
 
 		const si = document.getElementById("statIdeas");
@@ -293,13 +359,20 @@ document.addEventListener("DOMContentLoaded", () => {
 			].map((t) => t.dataset.platform);
 			userData.preferences = { ...userData.preferences, platforms };
 			localStorage.setItem("ideaEngneUserData", JSON.stringify(userData));
+			let syncFailed = false;
 			try {
 				if (window.updateProfile && userData.id)
 					await window.updateProfile(userData.id, {
 						preferences: userData.preferences,
 					});
-			} catch {}
-			showToast("✅ Preferences saved!");
+			} catch {
+				syncFailed = true;
+			}
+			showToast(
+				syncFailed
+					? "⚠️ Preferences saved locally, but cloud sync failed."
+					: "✅ Preferences saved!"
+			);
 			closeSettings();
 		});
 
@@ -352,11 +425,11 @@ document.addEventListener("DOMContentLoaded", () => {
 				userData.avatar_url = url;
 				localStorage.setItem("ideaEngneUserData", JSON.stringify(userData));
 				document.getElementById("avatarPreview").innerHTML =
-					`<img src="${url}" alt="Avatar">`;
+					`<img src="${escapeHtml(url)}" alt="Avatar">`;
 				["userAvatar", "dropdownAvatar"].forEach((id) => {
 					const el = document.getElementById(id);
 					if (el)
-						el.innerHTML = `<img src="${url}" alt="Avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+						el.innerHTML = `<img src="${escapeHtml(url)}" alt="Avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
 				});
 				showToast("✅ Photo updated!");
 			} catch (err) {
@@ -410,7 +483,6 @@ document.addEventListener("DOMContentLoaded", () => {
 	exportBtn = document.getElementById("exportBtn");
 
 	if (!form) {
-		console.error("❌ #generatorForm not found in app.html");
 		return;
 	}
 
@@ -425,6 +497,14 @@ document.addEventListener("DOMContentLoaded", () => {
 		const tone = document.getElementById("tone")?.value.trim() || "";
 		if (!niche) {
 			showToast("⚠️ Please describe your niche");
+			return;
+		}
+		if (!audience) {
+			showToast("⚠️ Please describe your target audience");
+			return;
+		}
+		if (!tone) {
+			showToast("⚠️ Please describe your brand tone");
 			return;
 		}
 		if (selectedPlatforms.size === 0) {
@@ -488,38 +568,17 @@ document.addEventListener("DOMContentLoaded", () => {
 			});
 			displayIdeas(ideas);
 			if (emptyState) emptyState.style.display = "none";
-		} catch (e) {
-			console.error("Could not restore previous ideas:", e);
+		} catch {
+			if (emptyState) emptyState.style.display = "flex";
 		}
 	}
-});
+}
 
 // ─── GENERATE IDEAS ───────────────────────────────────────────
 async function generateIdeas({ niche, audience, tone, platforms }) {
-	const GROQ_API_KEY = window.ENV?.GROQ_API_KEY;
+	const session = await getAuthenticatedSession();
+	if (!session) return;
 
-	if (!GROQ_API_KEY || GROQ_API_KEY === "YOUR-GROQ-API-KEY-HERE") {
-		// This fires when GitHub Pages is still serving the placeholder config.js.
-		// Fix: GitHub repo → Settings → Pages → Source → "GitHub Actions" (not branch).
-		if (errorState) errorState.classList.add("active");
-		const msg = document.getElementById("errorMessage");
-		if (msg)
-			msg.innerHTML = `
-      ⚠️ <strong>Service temporarily unavailable</strong><br><br>
-      Our AI engine is being configured. Please try again in a few minutes.<br><br>
-      If this persists, try a hard-refresh: <kbd>Ctrl+Shift+R</kbd>`;
-		if (loadingState) loadingState.classList.remove("active");
-		if (generateBtn) {
-			generateBtn.disabled = false;
-			generateBtn.innerHTML = `<i class="fas fa-magic"></i> Generate Ideas`;
-		}
-		console.warn(
-			'[Idea-Engne] API key not injected. Check GitHub Pages source is set to "GitHub Actions" not branch.'
-		);
-		return;
-	}
-
-	const ideasCount = userData.subscription === "free" ? 15 : 30;
 	if (emptyState) emptyState.style.display = "none";
 	if (errorState) errorState.classList.remove("active");
 	if (loadingState) loadingState.classList.add("active");
@@ -531,90 +590,44 @@ async function generateIdeas({ niche, audience, tone, platforms }) {
 	}
 
 	try {
-		const prompt = `You are an expert social media content strategist. Generate exactly ${ideasCount} unique, platform-native, publish-ready content pieces.
-
-Niche: ${niche}
-${audience ? `Target audience: ${audience}. ` : ""}${tone ? `Brand tone: ${tone}. ` : ""}Platforms: ${platforms.map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join(", ")}
-
-REQUIREMENTS:
-- Each idea COMPLETE and PUBLISH-READY — creator copies and posts immediately
-- Natural human voice matching platform culture
-- Specific to niche, NOT generic advice
-- Minimum 80 words per idea
-
-Return ONLY a valid JSON array with exactly ${ideasCount} objects:
-{
-  "idea": "Full post copy — minimum 80 words",
-  "platform": "instagram",
-  "format": "Reel",
-  "hook": "Opening line to stop the scroll (10-15 words)",
-  "cta": "Call-to-action closing line (8-12 words)"
-}
-Return ONLY the JSON array. No markdown. No explanation.`;
-
 		const controller = new AbortController();
-		const timeoutId = setTimeout(() => controller.abort(), 30000);
-
-		const response = await fetch(
-			"https://api.groq.com/openai/v1/chat/completions",
-			{
+		const timeoutId = setTimeout(() => controller.abort(), 50000);
+		let response;
+		try {
+			response = await fetch("/api/generate", {
 				method: "POST",
 				headers: {
-					Authorization: `Bearer ${GROQ_API_KEY}`,
+					Authorization: `Bearer ${session.access_token}`,
 					"Content-Type": "application/json",
 				},
-				body: JSON.stringify({
-					model: AI_MODEL,
-					messages: [
-						{
-							role: "system",
-							content:
-								"You are a world-class social media content strategist. Respond with valid JSON arrays ONLY.",
-						},
-						{ role: "user", content: prompt },
-					],
-					temperature: 0.8,
-					max_tokens: 4000,
-					top_p: 0.95,
-					stream: false,
-				}),
+				body: JSON.stringify({ niche, audience, tone, platforms }),
 				signal: controller.signal,
-			}
-		);
-
-		clearTimeout(timeoutId);
-		if (!response.ok) {
-			const txt = await response.text();
-			let errData;
-			try {
-				errData = JSON.parse(txt);
-			} catch {
-				errData = { error: { message: txt } };
-			}
-			throw new Error(errData.error?.message || `API error ${response.status}`);
+			});
+		} finally {
+			clearTimeout(timeoutId);
 		}
 
-		const data = await response.json();
-		if (!data?.choices?.[0]?.message?.content)
-			throw new Error("Invalid API response structure");
-
-		let raw = data.choices[0].message.content
-			.trim()
-			.replace(/```json\n?/g, "")
-			.replace(/```\n?/g, "")
-			.trim();
 		let ideas;
 		try {
-			ideas = JSON.parse(raw);
+			ideas = await response.json();
 		} catch {
-			const m = raw.match(/\[[\s\S]*\]/);
-			if (m) ideas = JSON.parse(m[0]);
-			else throw new Error("Could not parse AI response. Try again.");
+			throw new Error("Invalid response from generation service.");
 		}
-		if (!Array.isArray(ideas) || !ideas.length)
-			throw new Error("AI returned empty or invalid data.");
 
-		ideas = ideas.slice(0, ideasCount).map((idea, i) => ({
+		if (!response.ok) {
+			const error = new Error(
+				typeof ideas?.error === "string"
+					? ideas.error
+					: "Generation failed. Please try again."
+			);
+			error.status = response.status;
+			throw error;
+		}
+
+		if (!Array.isArray(ideas) || !ideas.length)
+			throw new Error("Generation service returned invalid data.");
+
+		ideas = ideas.slice(0, 15).map((idea, i) => ({
 			idea: idea.idea || idea.content || idea.text || `Idea ${i + 1}`,
 			platform: (
 				idea.platform || platforms[i % platforms.length]
@@ -637,6 +650,7 @@ Return ONLY the JSON array. No markdown. No explanation.`;
 		localStorage.setItem("ideaEngneUserData", JSON.stringify(userData));
 		updateQuotaDisplay();
 
+		let syncFailed = false;
 		try {
 			if (window.incrementIdeasGenerated)
 				await window.incrementIdeasGenerated(ideas.length);
@@ -648,35 +662,52 @@ Return ONLY the JSON array. No markdown. No explanation.`;
 					tone: tone || null,
 					audience: audience || null,
 				});
-		} catch (syncErr) {
-			console.warn("Supabase sync (non-critical):", syncErr.message);
+		} catch {
+			syncFailed = true;
 		}
 
 		displayIdeas(ideas);
 		localStorage.setItem("ideaEngneLastIdeas", JSON.stringify(ideas));
-		showToast(`✨ ${ideas.length} ideas generated!`);
+		showToast(
+			syncFailed
+				? "⚠️ Ideas were generated, but cloud sync failed."
+				: `✨ ${ideas.length} ideas generated!`
+		);
 		maybeShowReviewPrompt();
 		if (userData.subscription === "free" && userData.freeIdeasRemaining === 0)
 			setTimeout(showUpgradeModal, 2000);
 	} catch (error) {
-		console.error("Generation error:", error.message);
 		if (errorState) errorState.classList.add("active");
 		const msg = document.getElementById("errorMessage");
 		if (msg) {
-			if (error.name === "AbortError")
+			const errorStatus =
+				error && typeof error === "object" ? error.status : null;
+			const errorMessage =
+				error instanceof Error
+					? error.message
+					: "Generation failed. Please try again.";
+			if (errorStatus === 401) {
+				clearUserFlags();
+				await Promise.resolve()
+					.then(() =>
+						window.supabaseClient?.auth?.signOut({ scope: "local" })
+					)
+					.catch(() => null);
+				msg.innerHTML =
+					'<strong>🔒 Session expired</strong><br><br>Please <a href="signup.html">log in again</a> to generate ideas.';
+			} else if (errorStatus === 429) {
+				msg.innerHTML =
+					"<strong>⏰ Please wait</strong><br><br>Too many requests. Wait one minute before trying again.";
+			} else if (error && error.name === "AbortError")
 				msg.innerHTML = `<strong>⏰ Timeout</strong><br>Request too slow. Check your connection.`;
-			else if (error.message.includes("401"))
-				msg.innerHTML = `<strong>❌ Invalid Key</strong><br>Groq API key rejected. Check config.js.`;
-			else if (error.message.includes("429"))
-				msg.innerHTML = `<strong>⏰ Rate Limited</strong><br>Too many requests. Wait a minute.`;
 			else
-				msg.innerHTML = `<strong>❌ Generation Failed</strong><br><br>${error.message}<br><br>Try simplifying your niche or checking your connection.`;
+				msg.innerHTML = `<strong>❌ Generation Failed</strong><br><br>${escapeHtml(errorMessage)}<br><br>Try simplifying your niche or checking your connection.`;
 		}
 	} finally {
 		if (loadingState) loadingState.classList.remove("active");
 		if (generateBtn) {
 			generateBtn.disabled = false;
-			generateBtn.innerHTML = `<i class="fas fa-magic"></i> Generate ${userData?.subscription === "free" ? "15" : "30"} Ideas`;
+			generateBtn.innerHTML = '<i class="fas fa-magic"></i> Generate 15 Ideas';
 		}
 	}
 }
@@ -694,9 +725,8 @@ function displayIdeas(ideas) {
 		const card = document.createElement("div");
 		card.className = "idea-card";
 		const ideaText = idea.idea || idea.content || idea.text || "No idea text";
-		const pLabel =
-			(idea.platform || "General").charAt(0).toUpperCase() +
-			(idea.platform || "General").slice(1);
+		const platform = String(idea.platform || "General");
+		const pLabel = platform.charAt(0).toUpperCase() + platform.slice(1);
 
 		card.innerHTML = `
       <div class="idea-header">
@@ -706,8 +736,8 @@ function displayIdeas(ideas) {
           <p class="idea-text">${escapeHtml(ideaText)}</p>
           ${idea.cta ? `<p class="idea-cta"><strong>CTA:</strong> ${escapeHtml(idea.cta)}</p>` : ""}
           <div class="idea-meta">
-            <span class="meta-tag"><i class="fas fa-layer-group"></i> ${idea.format || "Post"}</span>
-            <span class="platform-badge ${(idea.platform || "general").toLowerCase()}">${pLabel}</span>
+            <span class="meta-tag"><i class="fas fa-layer-group"></i> ${escapeHtml(idea.format || "Post")}</span>
+            <span class="platform-badge ${escapeHtml(platform.toLowerCase())}">${escapeHtml(pLabel)}</span>
           </div>
         </div>
       </div>
@@ -739,10 +769,9 @@ function displayIdeas(ideas) {
 				btn.classList.add("saved");
 				btn.querySelector("i").className = "fas fa-check";
 				showToast("💾 Saved to your vault!");
-			} catch (err) {
+			} catch {
 				btn.disabled = false;
 				showToast("❌ Save failed.");
-				console.error(err);
 			}
 		});
 	});
@@ -785,7 +814,10 @@ function initSavedIdeasModal() {
 				try {
 					if (window.deleteSavedIdea)
 						await window.deleteSavedIdea(card.dataset.id);
-				} catch {}
+				} catch {
+					showToast("❌ Delete failed.");
+					return;
+				}
 				card.remove();
 			}
 			if (list)
@@ -820,7 +852,7 @@ async function openSavedIdeasModal() {
 			list.innerHTML = ideas
 				.map(
 					(idea) => `
-      <div class="saved-idea-card" data-id="${idea.id}">
+      <div class="saved-idea-card" data-id="${escapeHtml(idea.id)}">
         <div class="saved-idea-badges">
           <span class="saved-badge saved-badge--platform">${escapeHtml(idea.platform || "General")}</span>
           <span class="saved-badge saved-badge--format">${escapeHtml(idea.format || "Post")}</span>
@@ -830,7 +862,7 @@ async function openSavedIdeasModal() {
         ${idea.cta ? `<p class="saved-idea-cta"><strong>CTA:</strong> ${escapeHtml(idea.cta)}</p>` : ""}
         <div class="saved-idea-actions">
           <button class="saved-copy-btn"   data-text="${escapeHtml(idea.idea)}"><i class="fas fa-copy"></i> Copy</button>
-          <button class="saved-delete-btn" data-id="${idea.id}"><i class="fas fa-trash"></i> Delete</button>
+          <button class="saved-delete-btn" data-id="${escapeHtml(idea.id)}"><i class="fas fa-trash"></i> Delete</button>
         </div>
       </div>`
 				)
@@ -856,11 +888,10 @@ async function openSavedIdeasModal() {
 				}
 			});
 		});
-	} catch (err) {
+	} catch {
 		if (list)
 			list.innerHTML =
 				'<p class="saved-loading" style="color:#dc2626;">Error loading vault. Try again.</p>';
-		console.error(err);
 	}
 }
 
@@ -949,11 +980,10 @@ function initReviewModal() {
 				showToast("🙌 Thanks for your review!");
 				closeReview();
 				localStorage.setItem("ideaEngneReviewed", "true");
-			} catch (err) {
+			} catch {
 				showToast("❌ Submission failed.");
 				btn.disabled = false;
 				btn.innerHTML = "Submit Review";
-				console.error(err);
 			}
 		});
 }
@@ -984,7 +1014,6 @@ function showUpgradeModal() {
       <p>You have used all your free ideas. Upgrade for unlimited generation.</p>
       <div class="upgrade-benefits">
         <div class="upgrade-benefit"><i class="fas fa-infinity"></i><span>Unlimited generation</span></div>
-        <div class="upgrade-benefit"><i class="fas fa-bolt"></i><span>30 ideas per session</span></div>
         <div class="upgrade-benefit"><i class="fas fa-save"></i><span>Unlimited saved ideas</span></div>
         <div class="upgrade-benefit"><i class="fas fa-headset"></i><span>Priority support</span></div>
       </div>
@@ -1032,14 +1061,5 @@ function escapeHtml(text) {
 		'"': "&quot;",
 		"'": "&#039;",
 	};
-	return String(text || "").replace(/[&<>"']/g, (m) => map[m]);
+	return String(text == null ? "" : text).replace(/[&<>"']/g, (m) => map[m]);
 }
-
-console.log(
-	"%c⚡ Idea-Engne Dashboard",
-	"font-size:22px;font-weight:900;color:#4f39f6;"
-);
-console.log(
-	"%cPowered by Groq + Supabase | Built by TonyDev",
-	"font-size:14px;color:#22D3EE;font-weight:600;"
-);

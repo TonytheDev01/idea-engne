@@ -424,7 +424,6 @@ async function handleOAuth(provider) {
 				);
 			}
 		}
-		console.error(`OAuth error (${provider}):`, error);
 	}
 }
 
@@ -468,9 +467,19 @@ document.addEventListener("DOMContentLoaded", async () => {
 			window.location.href = "app.html";
 			return;
 		}
-	} catch (err) {
-		console.error("Session check failed:", err);
+	} catch {
 		hideLoading();
+		const activeForm = document.querySelector(".auth-form.active");
+		const emailInput = activeForm?.querySelector('[type="email"]');
+		if (emailInput) {
+			const errorId =
+				emailInput.id === "loginEmail" ? "loginEmailError" : "emailError";
+			showError(
+				emailInput.id,
+				errorId,
+				"Unable to check your session. Please try again."
+			);
+		}
 	}
 
 	// Pre-fill email if user came from landing page CTA
@@ -483,13 +492,3 @@ document.addEventListener("DOMContentLoaded", async () => {
 		localStorage.removeItem("ideaEngnePrefilledEmail");
 	}
 });
-
-// ========== CONSOLE BRANDING ==========
-console.log(
-	"%c⚡ Idea-Engne Auth",
-	"font-size:20px;font-weight:900;color:#4f39f6;"
-);
-console.log(
-	"%cPowered by Supabase | Built by TonyDev",
-	"font-size:14px;color:#22D3EE;font-weight:600;"
-);

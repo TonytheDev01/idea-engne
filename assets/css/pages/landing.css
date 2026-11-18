@@ -1780,6 +1780,13 @@ nav[aria-label="Main navigation"] {
 	gap: 2.5rem;
 }
 
+.testimonials-empty-state {
+	grid-column: 1 / -1;
+	text-align: center;
+	color: var(--text-light);
+	padding: 3rem 2rem;
+}
+
 .testimonial-card {
 	background: var(--white);
 	border-radius: var(--radius-lg);
