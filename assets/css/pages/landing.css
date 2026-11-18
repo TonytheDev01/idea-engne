@@ -30,16 +30,7 @@
 	--max-w: 128rem;
 }
 
-*,
-*::before,
-*::after {
-	margin: 0;
-	padding: 0;
-	box-sizing: border-box;
-}
-
 html {
-	font-size: 62.5%;
 	scroll-behavior: smooth;
 }
 
@@ -271,20 +262,21 @@ header.scrolled {
 .brand-icon {
 	width: 3.2rem;
 	height: 3.2rem;
-	background: var(--primary);
+	background: transparent;
 	border-radius: 1rem;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	animation: brand-pulse 3s ease-in-out infinite;
+	overflow: hidden;
 }
 
+.brand-icon img,
 .brand-icon svg {
-	width: 2rem;
-	height: 2rem;
-	fill: none;
-	stroke: var(--white);
-	stroke-width: 2;
+	width: 100%;
+	height: 100%;
+	display: block;
+	object-fit: cover;
 }
 
 /* Mobile: hide desktop nav, show hamburger */
@@ -1788,6 +1780,13 @@ nav[aria-label="Main navigation"] {
 	gap: 2.5rem;
 }
 
+.testimonials-empty-state {
+	grid-column: 1 / -1;
+	text-align: center;
+	color: var(--text-light);
+	padding: 3rem 2rem;
+}
+
 .testimonial-card {
 	background: var(--white);
 	border-radius: var(--radius-lg);
@@ -2871,7 +2870,7 @@ footer {
 	}
 
 	.nav-links a {
-		font-size: 1.8rem;
+		font-size: 2rem;
 		font-weight: 600;
 		color: var(--text-mid);
 		transition: color 0.2s ease;
@@ -3088,6 +3087,10 @@ footer {
 		gap: 2.5rem;
 	}
 
+	.pricing-grid > .pricing-card--team {
+		grid-column: 1 / -1;
+	}
+
 	.built-by-inner {
 		flex-direction: row;
 		gap: 5rem;
@@ -3121,10 +3124,60 @@ footer {
 	}
 }
 
+@media (min-width: 768px) and (max-width: 850px) {
+	.header-inner {
+		gap: 0.6rem;
+		padding-right: 1.2rem;
+		padding-left: 1.2rem;
+	}
+
+	.brand {
+		flex-shrink: 0;
+		font-size: 1.6rem;
+		gap: 0.5rem;
+	}
+
+	.brand-icon {
+		width: 2.4rem;
+		height: 2.4rem;
+	}
+
+	nav[aria-label="Main navigation"] {
+		min-width: 0;
+		margin: 0 0.6rem;
+	}
+
+	.nav-links {
+		flex-wrap: nowrap;
+		gap: 0.8rem;
+	}
+
+	.nav-links a {
+		font-size: 1.4rem;
+	}
+
+	.header-cta {
+		gap: 0.5rem;
+	}
+
+	.header-cta button {
+		font-size: 1.3rem;
+		padding: 0.6rem 0.7rem;
+	}
+}
+
 /* --- 1024px: Desktop --- */
 @media (min-width: 1024px) {
 	.container {
 		padding: 0 4rem;
+	}
+
+	.pricing-grid {
+		grid-template-columns: repeat(3, 1fr);
+	}
+
+	.pricing-grid > .pricing-card--team {
+		grid-column: auto;
 	}
 
 	.section-title {
@@ -3212,6 +3265,10 @@ footer {
 		justify-content: flex-start;
 	}
 
+	.hero-stats {
+		justify-content: flex-start;
+	}
+
 	/* Steps connector line */
 	.steps-grid {
 		gap: 3rem;
@@ -3291,12 +3348,17 @@ footer {
 		justify-content: center;
 	}
 
-	.dev-card {
-		max-width: 50%;
-	}
-
 	.hero-visual {
 		animation: none;
+	}
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+	.hero-value-props {
+		width: fit-content;
+		max-width: 100%;
+		margin-left: auto;
+		margin-right: auto;
 	}
 }
 

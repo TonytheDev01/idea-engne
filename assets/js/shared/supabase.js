@@ -104,7 +104,7 @@ async function submitTestimonial(userId, name, rating, message) {
       user_id: userId,
       name,
       rating,
-      message,
+      content: message,
       approved: false
     }]);
   if (error) throw error;

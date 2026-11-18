@@ -4,6 +4,7 @@
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Sign Up - Idea-Engne</title>
+		<link rel="icon" type="image/svg+xml" href="assets/icons/idea-engne-icon.svg" />
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 		<link
@@ -12,7 +13,8 @@
 		<link
 			rel="stylesheet"
 			href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-		<link rel="stylesheet" href="assets/css/signup.css" />
+		<link rel="stylesheet" href="assets/css/base.css" />
+		<link rel="stylesheet" href="assets/css/pages/signup.css" />
 	</head>
 	<body>
 		<div class="bg-decoration"></div>
@@ -22,10 +24,7 @@
 			<div class="signup-left">
 				<a href="index.html" class="brand-logo">
 					<div class="brand-icon">
-						<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-							<path
-								d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-						</svg>
+						<img src="assets/icons/idea-engne-icon.svg" alt="Idea-Engne logo" />
 					</div>
 					<span>Idea-Engne</span>
 				</a>
@@ -36,7 +35,7 @@
 							>Actually Converts</span
 						>
 					</h1>
-					<p>Join 12,000+ creators who never run out of ideas</p>
+					<p>Join creators who never run out of ideas</p>
 				</div>
 
 				<div class="signup-benefits">
@@ -68,17 +67,9 @@
 						<div class="avatar">JD</div>
 						<div class="avatar">SM</div>
 						<div class="avatar">AL</div>
-						<div class="avatar">+12K</div>
 					</div>
 					<div class="proof-text">
-						<div class="stars">
-							<i class="fas fa-star"></i>
-							<i class="fas fa-star"></i>
-							<i class="fas fa-star"></i>
-							<i class="fas fa-star"></i>
-							<i class="fas fa-star"></i>
-						</div>
-						<p><strong>4.8/5</strong> from 12,000+ happy creators</p>
+						<p>Plan your next post with confidence.</p>
 					</div>
 				</div>
 			</div>
@@ -341,7 +332,7 @@
 
 		<!-- Scripts — order matters -->
 		<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-		<script src="assets/js/supabase.js"></script>
-		<script src="assets/js/signup.js"></script>
+		<script src="assets/js/shared/supabase.js"></script>
+		<script src="assets/js/pages/signup.js"></script>
 	</body>
 </html>
